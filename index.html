@@ -29,13 +29,18 @@
     input{font-size:16px}
     .progress{height:6px;background:#222a36}
     .progress > div{height:100%;background:#f97316;border-radius:9999px;width:0%}
+    .logo{width:28px;height:28px;object-fit:contain;border-radius:6px;background:#0f1115}
   </style>
 </head>
 <body>
   <!-- Top bar -->
   <header class="bar sticky top-0 z-10" style="height:var(--bar-h)">
     <div class="max-w-3xl mx-auto h-full flex items-center justify-between">
-      <div class="font-extrabold text-base sm:text-lg">Gloves Up 🥊🆙</div>
+      <div class="flex items-center gap-2">
+        <!-- Put logo.png in repo root to show your logo -->
+        <img src="logo.png" alt="Gloves Up" class="logo" onerror="this.replaceWith(Object.assign(document.createElement('span'),{textContent:'🥊',className:'text-xl'}))">
+        <div class="font-extrabold text-base sm:text-lg">Gloves Up 🥊🆙</div>
+      </div>
       <a class="px-3 py-2 rounded-full bg-green-600 hover:bg-green-700 font-bold text-sm"
          href="https://wa.me/447825954329?text=Hi%20Gloves%20Up%20🥊🆙%2C%20I%20want%20to%20book%20a%20session."
          target="_blank" rel="noopener noreferrer">WhatsApp</a>
@@ -53,10 +58,8 @@
           <div class="dot"></div>
         </div>
 
-        <!-- Progress bar -->
         <div class="progress"><div id="progressBar"></div></div>
 
-        <!-- Chat -->
         <div id="chat" class="chat space-y-3">
           <div class="flex items-start gap-3">
             <div class="bot px-4 py-3 rounded-2xl rounded-tl-sm t-sm">
@@ -65,18 +68,16 @@
           </div>
         </div>
 
-        <!-- Controls -->
         <div id="panel" class="panel"></div>
       </div>
     </div>
   </main>
 
   <script>
-    /* ====== viewport fix for iOS Safari ====== */
+    // iOS viewport fix
     function setVh(){ document.documentElement.style.setProperty('--app-vh', window.innerHeight+'px'); }
     setVh(); addEventListener('resize', setVh); addEventListener('orientationchange', ()=>setTimeout(setVh,250));
 
-    /* ============== Bot engine ============== */
     const chat  = document.getElementById('chat');
     const panel = document.getElementById('panel');
     const stepLabel = document.getElementById('stepLabel');
@@ -93,27 +94,33 @@
       {id:'halfprice', label:'💥 Half-Price First Hour'},
       {id:'prices',    label:'💰 Prices & Info'}
     ];
+
     const stepBeenHere = {k:'been', q:'Have you trained with Gloves Up before?', type:'choice', opts:['Yes','No']};
 
     const suggestedTimes = {
       generic:['Today','Tomorrow','Morning','Afternoon','Evening'],
       standard:['Mon 7 PM','Tue 5 PM'],
-      advanced:['Wed 8 PM','Thu 5 PM'],
+      advanced:['Wed 7 PM','Wed 8 PM','Thu 5 PM'],
       fighters:["Sat 1 PM"]
     };
 
+    // Helper: condition to skip health/emergency if returning
+    const onlyIfNew = (d)=> d.been !== 'Yes';
+
     const flows = {
       believers:{
-        intro:"Believers 💥 £10/30 • £15/60 — I’ll grab a few details.",
+        intro:"Believers 💥 £10 half session (30 minutes) • £15 for 1 hour — I’ll grab a few details.",
         steps:[
           {k:'name', q:'Your name'},
           {k:'age',  q:'Age', type:'number'},
           stepBeenHere,
-          {k:'duration', q:'Duration', type:'choice', opts:['30 mins (£10)','60 mins (£15)']},
+          {k:'duration', q:'Pick a duration', type:'choice', opts:['Half session (30 minutes) — £10','1 hour — £15']},
           {k:'when', q:'Preferred day & time (e.g., Mon 4:30pm)', suggest:suggestedTimes.generic},
-          {k:'health', q:'Health conditions (if any)'},
-          {k:'parent', q:'Parent/Guardian name & number (if U18)', cond:d=>parseInt(d.age||0,10)<18},
-          {k:'emergency', q:'Emergency contact name & number', inputmode:'tel'}
+          {k:'health', q:'Health conditions (if any)', cond:onlyIfNew},
+          {k:'parent', q:'Parent/Guardian name (if U18)', cond:(d)=>onlyIfNew(d) && parseInt(d.age||0,10)<18},
+          {k:'parentNum', q:'Parent/Guardian number (if U18)', inputmode:'text', cond:(d)=>onlyIfNew(d) && parseInt(d.age||0,10)<18},
+          {k:'emgName', q:'Emergency contact name', cond:onlyIfNew},
+          {k:'emgNum',  q:'Emergency contact number', inputmode:'text', cond:onlyIfNew}
         ],
         build:d=>`Hi Gloves Up 🥊🆙, I want to book as a Believer.
 Name: ${d.name}
@@ -121,21 +128,26 @@ Age: ${d.age}
 Been Before: ${d.been}
 Duration: ${d.duration}
 Preferred Day/Time: ${d.when}
-Health Conditions: ${d.health||'None'}
-Parent/Guardian: ${d.parent||'N/A'}
-Emergency Contact: ${d.emergency}`
+Health Conditions: ${d.health || (d.been==='Yes'?'On file':'None')}
+Parent/Guardian: ${d.parent || (parseInt(d.age||0,10)<18 ? 'Provided' : 'N/A')}
+Parent/Guardian Number: ${d.parentNum || (parseInt(d.age||0,10)<18 ? 'Provided' : 'N/A')}
+Emergency Contact: ${d.emgName || (d.been==='Yes'?'On file':'')}
+Emergency Number: ${d.emgNum  || (d.been==='Yes'?'On file':'')}`
       },
+
       builders:{
-        intro:"Builders 🚀 £10/30 • £20/60 — let’s go.",
+        intro:"Builders 🚀 £10 half session (30 minutes) • £20 for 1 hour — let’s go.",
         steps:[
           {k:'name', q:'Your name'},
           {k:'age',  q:'Age', type:'number'},
           stepBeenHere,
-          {k:'duration', q:'Duration', type:'choice', opts:['30 mins (£10)','60 mins (£20)']},
+          {k:'duration', q:'Pick a duration', type:'choice', opts:['Half session (30 minutes) — £10','1 hour — £20']},
           {k:'when', q:'Preferred day & time', suggest:suggestedTimes.generic},
-          {k:'health', q:'Health conditions (if any)'},
-          {k:'parent', q:'Parent/Guardian name & number (if U18)', cond:d=>parseInt(d.age||0,10)<18},
-          {k:'emergency', q:'Emergency contact name & number', inputmode:'tel'}
+          {k:'health', q:'Health conditions (if any)', cond:onlyIfNew},
+          {k:'parent', q:'Parent/Guardian name (if U18)', cond:(d)=>onlyIfNew(d) && parseInt(d.age||0,10)<18},
+          {k:'parentNum', q:'Parent/Guardian number (if U18)', inputmode:'text', cond:(d)=>onlyIfNew(d) && parseInt(d.age||0,10)<18},
+          {k:'emgName', q:'Emergency contact name', cond:onlyIfNew},
+          {k:'emgNum',  q:'Emergency contact number', inputmode:'text', cond:onlyIfNew}
         ],
         build:d=>`Hi Gloves Up 🥊🆙, I want to book as a Builder.
 Name: ${d.name}
@@ -143,20 +155,24 @@ Age: ${d.age}
 Been Before: ${d.been}
 Duration: ${d.duration}
 Preferred Day/Time: ${d.when}
-Health Conditions: ${d.health||'None'}
-Parent/Guardian: ${d.parent||'N/A'}
-Emergency Contact: ${d.emergency}`
+Health Conditions: ${d.health || (d.been==='Yes'?'On file':'None')}
+Parent/Guardian: ${d.parent || (parseInt(d.age||0,10)<18 ? 'Provided' : 'N/A')}
+Parent/Guardian Number: ${d.parentNum || (parseInt(d.age||0,10)<18 ? 'Provided' : 'N/A')}
+Emergency Contact: ${d.emgName || (d.been==='Yes'?'On file':'')}
+Emergency Number: ${d.emgNum  || (d.been==='Yes'?'On file':'')}`
       },
+
       becomers:{
-        intro:"Becomers 💪 £15/30 • £25/60 — lock it in.",
+        intro:"Becomers 💪 £15 half session (30 minutes) • £25 for 1 hour — lock it in.",
         steps:[
           {k:'name', q:'Your name'},
           {k:'age',  q:'Age', type:'number'},
           stepBeenHere,
-          {k:'duration', q:'Duration', type:'choice', opts:['30 mins (£15)','60 mins (£25)']},
+          {k:'duration', q:'Pick a duration', type:'choice', opts:['Half session (30 minutes) — £15','1 hour — £25']},
           {k:'when', q:'Preferred day & time', suggest:suggestedTimes.generic},
-          {k:'health', q:'Health conditions (if any)'},
-          {k:'emergency', q:'Emergency contact name & number', inputmode:'tel'}
+          {k:'health', q:'Health conditions (if any)', cond:onlyIfNew},
+          {k:'emgName', q:'Emergency contact name', cond:onlyIfNew},
+          {k:'emgNum',  q:'Emergency contact number', inputmode:'text', cond:onlyIfNew}
         ],
         build:d=>`Hi Gloves Up 🥊🆙, I want to book as a Becomer.
 Name: ${d.name}
@@ -164,19 +180,22 @@ Age: ${d.age}
 Been Before: ${d.been}
 Duration: ${d.duration}
 Preferred Day/Time: ${d.when}
-Health Conditions: ${d.health||'None'}
-Emergency Contact: ${d.emergency}`
+Health Conditions: ${d.health || (d.been==='Yes'?'On file':'None')}
+Emergency Contact: ${d.emgName || (d.been==='Yes'?'On file':'')}
+Emergency Number: ${d.emgNum  || (d.been==='Yes'?'On file':'')}`
       },
+
       skipping:{
-        intro:"Rise & Rope 🪢 £10/30 — pick your level.",
+        intro:"Rise & Rope 🪢 £10 half session (30 minutes) — pick your level.",
         steps:[
           {k:'name', q:'Your name'},
           {k:'age',  q:'Age', type:'number'},
           stepBeenHere,
           {k:'level', q:'Level', type:'choice', opts:['Beginner','Intermediate','Advanced']},
           {k:'when', q:'Preferred day & time', suggest:suggestedTimes.generic},
-          {k:'health', q:'Health conditions (if any)'},
-          {k:'emergency', q:'Emergency contact name & number', inputmode:'tel'}
+          {k:'health', q:'Health conditions (if any)', cond:onlyIfNew},
+          {k:'emgName', q:'Emergency contact name', cond:onlyIfNew},
+          {k:'emgNum',  q:'Emergency contact number', inputmode:'text', cond:onlyIfNew}
         ],
         build:d=>`Hi Gloves Up 🥊🆙, I want to book a Skipping (Rise & Rope) session.
 Name: ${d.name}
@@ -184,30 +203,39 @@ Age: ${d.age}
 Been Before: ${d.been}
 Level: ${d.level}
 Preferred Day/Time: ${d.when}
-Health Conditions: ${d.health||'None'}
-Emergency Contact: ${d.emergency}`
+Health Conditions: ${d.health || (d.been==='Yes'?'On file':'None')}
+Emergency Contact: ${d.emgName || (d.been==='Yes'?'On file':'')}
+Emergency Number: ${d.emgNum  || (d.been==='Yes'?'On file':'')}`
       },
+
       fitness:{
-        intro:"Fitness classes £5 (or 10 for £40). Pick your class.",
+        intro:"Fitness classes £5 each (or 10 for £40). Pick your class.",
         steps:[
-          {k:'class', q:'Class type', type:'choice', opts:['Standard (Mon 7 PM / Tue 5 PM)','Advanced (Wed 8 PM / Thu 5 PM)',"Fighters’ (Sat 1 PM)"]},
+          {k:'class', q:'Class type', type:'choice', opts:[
+            'Standard — Mon 7 PM','Standard — Tue 5 PM',
+            'Advanced — Wed 7 PM','Advanced — Wed 8 PM','Advanced — Thu 5 PM',
+            "Fighters’ — Sat 1 PM"
+          ]},
           stepBeenHere,
           {k:'people', q:'How many people?'},
           {k:'names',  q:'Names of attendees'},
-          {k:'when',   q:'Which day/time from schedule?', suggest:[...suggestedTimes.standard,...suggestedTimes.advanced,...suggestedTimes.fighters]},
-          {k:'health', q:'Health conditions (if any)'},
-          {k:'emergency', q:'Emergency contact name & number', inputmode:'tel'}
+          {k:'when',   q:'Confirm the day/time you want', suggest:[...suggestedTimes.standard,...suggestedTimes.advanced,...suggestedTimes.fighters]},
+          {k:'health', q:'Health conditions (if any)', cond:onlyIfNew},
+          {k:'emgName', q:'Emergency contact name', cond:onlyIfNew},
+          {k:'emgNum',  q:'Emergency contact number', inputmode:'text', cond:onlyIfNew}
         ],
         build:d=>`Hi Gloves Up 🥊🆙, I’d like to book a Fitness Class.
-Class Type: ${d.class}
+Class: ${d.class}
 Been Before: ${d.been}
 People: ${d.people}
 Names: ${d.names}
 Day & Time: ${d.when}
-Health Conditions: ${d.health||'None'}
-Emergency Contact: ${d.emergency}
-(£5 per person; 10 for £40 prepaid)`
+Health Conditions: ${d.health || (d.been==='Yes'?'On file':'None')}
+Emergency Contact: ${d.emgName || (d.been==='Yes'?'On file':'')}
+Emergency Number: ${d.emgNum  || (d.been==='Yes'?'On file':'')}
+(£5 per person; bundle 10 for £40 prepaid)`
       },
+
       taster:{
         intro:"Free Taster ⚡ 20 mins pads (first-timers).",
         steps:[
@@ -215,19 +243,24 @@ Emergency Contact: ${d.emergency}
           {k:'age',  q:'Age', type:'number'},
           stepBeenHere,
           {k:'when', q:'Preferred day & time', suggest:suggestedTimes.generic},
-          {k:'health', q:'Health conditions (if any)'},
-          {k:'parent', q:'Parent/Guardian name & number (if U18)', cond:d=>parseInt(d.age||0,10)<18},
-          {k:'emergency', q:'Emergency contact name & number', inputmode:'tel'}
+          {k:'health', q:'Health conditions (if any)', cond:onlyIfNew},
+          {k:'parent', q:'Parent/Guardian name (if U18)', cond:(d)=>onlyIfNew(d) && parseInt(d.age||0,10)<18},
+          {k:'parentNum', q:'Parent/Guardian number (if U18)', inputmode:'text', cond:(d)=>onlyIfNew(d) && parseInt(d.age||0,10)<18},
+          {k:'emgName', q:'Emergency contact name', cond:onlyIfNew},
+          {k:'emgNum',  q:'Emergency contact number', inputmode:'text', cond:onlyIfNew}
         ],
         build:d=>`Hi Gloves Up 🥊🆙, I’d like to book a Free Taster.
 Name: ${d.name}
 Age: ${d.age}
 Been Before: ${d.been}
 Preferred Day/Time: ${d.when}
-Health Conditions: ${d.health||'None'}
-Parent/Guardian: ${d.parent||'N/A'}
-Emergency Contact: ${d.emergency}`
+Health Conditions: ${d.health || (d.been==='Yes'?'On file':'None')}
+Parent/Guardian: ${d.parent || (parseInt(d.age||0,10)<18 ? 'Provided' : 'N/A')}
+Parent/Guardian Number: ${d.parentNum || (parseInt(d.age||0,10)<18 ? 'Provided' : 'N/A')}
+Emergency Contact: ${d.emgName || (d.been==='Yes'?'On file':'')}
+Emergency Number: ${d.emgNum  || (d.been==='Yes'?'On file':'')}`
       },
+
       halfprice:{
         intro:"Half-Price First Hour 💥",
         steps:[
@@ -235,45 +268,57 @@ Emergency Contact: ${d.emergency}`
           {k:'age',  q:'Age', type:'number'},
           stepBeenHere,
           {k:'when', q:'Preferred day & time', suggest:suggestedTimes.generic},
-          {k:'health', q:'Health conditions (if any)'},
-          {k:'parent', q:'Parent/Guardian name & number (if U18)', cond:d=>parseInt(d.age||0,10)<18},
-          {k:'emergency', q:'Emergency contact name & number', inputmode:'tel'}
+          {k:'health', q:'Health conditions (if any)', cond:onlyIfNew},
+          {k:'parent', q:'Parent/Guardian name (if U18)', cond:(d)=>onlyIfNew(d) && parseInt(d.age||0,10)<18},
+          {k:'parentNum', q:'Parent/Guardian number (if U18)', inputmode:'text', cond:(d)=>onlyIfNew(d) && parseInt(d.age||0,10)<18},
+          {k:'emgName', q:'Emergency contact name', cond:onlyIfNew},
+          {k:'emgNum',  q:'Emergency contact number', inputmode:'text', cond:onlyIfNew}
         ],
         build:d=>`Hi Gloves Up 🥊🆙, I’d like the Half-Price First Hour deal.
 Name: ${d.name}
 Age: ${d.age}
 Been Before: ${d.been}
 Preferred Day/Time: ${d.when}
-Health Conditions: ${d.health||'None'}
-Parent/Guardian: ${d.parent||'N/A'}
-Emergency Contact: ${d.emergency}`
+Health Conditions: ${d.health || (d.been==='Yes'?'On file':'None')}
+Parent/Guardian: ${d.parent || (parseInt(d.age||0,10)<18 ? 'Provided' : 'N/A')}
+Parent/Guardian Number: ${d.parentNum || (parseInt(d.age||0,10)<18 ? 'Provided' : 'N/A')}
+Emergency Contact: ${d.emgName || (d.been==='Yes'?'On file':'')}
+Emergency Number: ${d.emgNum  || (d.been==='Yes'?'On file':'')}`
       },
+
       prices:{
         intro:"Prices loaded 💰 Tell me what you want to book.",
         steps:[
           {k:'name', q:'Your name'},
           {k:'age',  q:'Age', type:'number'},
           stepBeenHere,
-          {k:'what', q:'What do you want to book?'},
+          {k:'what', q:'What do you want to book? (e.g., 1-1, Skipping, Fitness)'},
+          {k:'duration', q:'Pick a duration (if 1-1)', type:'choice', opts:[
+            'Half session (30 minutes)','1 hour'
+          ]},
           {k:'when', q:'Preferred day & time', suggest:suggestedTimes.generic},
-          {k:'health', q:'Health conditions (if any)'},
-          {k:'parent', q:'Parent/Guardian name & number (if U18)', cond:d=>parseInt(d.age||0,10)<18},
-          {k:'emergency', q:'Emergency contact name & number', inputmode:'tel'}
+          {k:'health', q:'Health conditions (if any)', cond:onlyIfNew},
+          {k:'parent', q:'Parent/Guardian name (if U18)', cond:(d)=>onlyIfNew(d) && parseInt(d.age||0,10)<18},
+          {k:'parentNum', q:'Parent/Guardian number (if U18)', inputmode:'text', cond:(d)=>onlyIfNew(d) && parseInt(d.age||0,10)<18},
+          {k:'emgName', q:'Emergency contact name', cond:onlyIfNew},
+          {k:'emgNum',  q:'Emergency contact number', inputmode:'text', cond:onlyIfNew}
         ],
         build:d=>`Hi Gloves Up 🥊🆙, I’d like to book.
 Name: ${d.name}
 Age: ${d.age}
 Been Before: ${d.been}
 Session Type: ${d.what}
+Duration: ${d.duration || 'N/A'}
 Date/Time: ${d.when}
-Health Conditions: ${d.health||'None'}
-Parent/Guardian: ${d.parent||'N/A'}
-Emergency Contact: ${d.emergency}`
+Health Conditions: ${d.health || (d.been==='Yes'?'On file':'None')}
+Parent/Guardian: ${d.parent || (parseInt(d.age||0,10)<18 ? 'Provided' : 'N/A')}
+Parent/Guardian Number: ${d.parentNum || (parseInt(d.age||0,10)<18 ? 'Provided' : 'N/A')}
+Emergency Contact: ${d.emgName || (d.been==='Yes'?'On file':'')}
+Emergency Number: ${d.emgNum  || (d.been==='Yes'?'On file':'')}`
       }
     };
 
     let state = JSON.parse(localStorage.getItem('gu_state')||'null') || { flow:null, step:0, data:{} };
-
     function save(){ localStorage.setItem('gu_state', JSON.stringify(state)); }
     function clearSave(){ localStorage.removeItem('gu_state'); }
 
@@ -292,7 +337,7 @@ Emergency Contact: ${d.emergency}`
 
     function setProgress(){
       if(!state.flow){ stepLabel.textContent='Menu'; progressBar.style.width='0%'; return; }
-      const f=flows[state.flow], total=f.steps.filter(s=>!s.cond || s.cond(state.data)).length;
+      const f=flows[state.flow], total=f.steps.filter(s=>(!s.cond || s.cond(state.data))).length;
       const step=Math.min(state.step+1,total);
       stepLabel.textContent=`Step ${Math.min(step,total)} of ${total}`;
       progressBar.style.width = (Math.max(0,Math.min(step,total))/total*100)+'%';
@@ -308,7 +353,6 @@ Emergency Contact: ${d.emergency}`
         b.onclick=()=>startFlow(m.id);
         grid.appendChild(b);
       });
-      // Also a reset if restoring
       setProgress(); save();
     }
 
@@ -332,15 +376,16 @@ Emergency Contact: ${d.emergency}`
       const f=flows[state.flow];
       setProgress(); save();
 
+      // iterate to next eligible step
       while(state.step<f.steps.length){
         const s=f.steps[state.step];
         if(s.cond && !s.cond(state.data)){ state.step++; continue; }
         drawStep(s); return;
       }
 
-      // Guardrail: Free Taster but "Been Before: Yes"
+      // Free Taster guard (still allowed to continue)
       if(state.flow==='taster' && state.data.been==='Yes'){
-        addBot("Quick heads-up: Free Taster is for first-timers. You can still message me, or switch to the 💥 Half-Price First Hour.");
+        addBot("Heads-up: Free Taster is for first-timers. You can still message me, or switch to the 💥 Half-Price First Hour.");
         const msg=f.build(state.data);
         panel.innerHTML=`
           <div class="space-y-3">
@@ -365,7 +410,6 @@ Emergency Contact: ${d.emergency}`
     }
 
     function drawStep(s){
-      // Choice step
       if(s.type==='choice'){
         panel.innerHTML=`
           <div class="space-y-2">
@@ -384,9 +428,8 @@ Emergency Contact: ${d.emergency}`
         setProgress(); return;
       }
 
-      // Text/number input
-      const typeAttr = s.type==='number' ? 'number' : 'text';
       const inputmode = s.inputmode ? `inputmode="${s.inputmode}"` : (s.type==='number' ? 'inputmode="numeric"' : 'inputmode="text"');
+      const typeAttr  = s.type==='number' ? 'number' : 'text';
 
       panel.innerHTML=`
         <div class="space-y-3">
@@ -413,7 +456,6 @@ Emergency Contact: ${d.emergency}`
 
     function next(key, type){
       let v=(document.getElementById('inp').value||'').trim();
-      // Simple validation
       if(!v){ addBot("Quick one — I need that to continue 💬"); return; }
       if(type==='number'){
         const n=parseInt(v,10);
@@ -433,12 +475,8 @@ Emergency Contact: ${d.emergency}`
       state={flow:null,step:0,data:{}}; clearSave(); clearChat(); renderMenu();
     }
 
-    // Boot (restore if we have state)
-    if(state.flow){
-      addBot('Welcome back — restoring your progress.'); ask();
-    }else{
-      renderMenu();
-    }
+    // boot
+    if(state.flow){ addBot('Welcome back — restoring your progress.'); ask(); } else { renderMenu(); }
   </script>
 </body>
 </html>
