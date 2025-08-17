@@ -1,102 +1,128 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>Gloves Up 🥊🆙 — Bot</title>
-<script src="https://cdn.tailwindcss.com"></script>
-<style>
-html, body { height: 100%; overflow: hidden; background: #0f1115; color: #eef2f7; }
-.bot { background:#2a2f3a }
-.user { background:#3b4252 }
-.btn { background:#475062 } .btn:hover{ background:#59627a }
-.bar { background:#161a22; border-bottom:1px solid #2a2f3a }
-.panel { border-top:1px solid #2a2f3a }
-</style>
+  <meta charset="utf-8"/>
+  <meta name="viewport"
+        content="width=device-width, initial-scale=1, viewport-fit=cover"/>
+  <title>Gloves Up 🥊🆙 — Bot</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    :root{
+      /* will be set by JS to fix iOS 100vh */
+      --app-vh: 100vh;
+      --bar-h: 56px;
+      --gap: 12px;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%;margin:0;background:#0f1115;color:#eef2f7}
+    body{
+      /* no rubber-band on iOS outside chat */
+      overscroll-behavior: none;
+      -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;
+    }
+    .bar{background:#161a22;border-bottom:1px solid #2a2f3a;
+      padding-left: max(16px, env(safe-area-inset-left));
+      padding-right:max(16px, env(safe-area-inset-right));
+      padding-top: env(safe-area-inset-top);
+    }
+    .wrap{
+      height: calc(var(--app-vh) - var(--bar-h) - env(safe-area-inset-bottom));
+      padding-left: max(16px, env(safe-area-inset-left));
+      padding-right:max(16px, env(safe-area-inset-right));
+      padding-bottom: max(12px, env(safe-area-inset-bottom));
+    }
+    .frame{border:1px solid #2a2f3a;border-radius:20px;display:flex;flex-direction:column;height:100%;overflow:hidden;background:#10141d}
+    .top{background:#161a22;display:flex;align-items:center;gap:10px;padding:12px 16px;border-bottom:1px solid #2a2f3a}
+    .dot{width:8px;height:8px;border-radius:9999px;background:#22c55e;margin-left:auto}
+    .chat{flex:1;overflow:auto;padding:14px;scroll-behavior:smooth;-webkit-overflow-scrolling:touch}
+    .panel{padding:14px;border-top:1px solid #2a2f3a;background:#111824}
+    .bot{background:#2a2f3a}
+    .user{background:#3b4252}
+    .btn{background:#475062;border-radius:14px}
+    .btn:active{transform:translateY(1px)}
+    /* Responsive text sizes */
+    .t-sm{font-size:14px}
+    @media (min-width:420px){ .t-sm{font-size:15px} }
+    @media (min-width:768px){ :root{ --bar-h: 64px } .t-sm{font-size:16px} }
+    /* Larger hit targets on mobile */
+    .tap{padding:14px 16px}
+    /* Prevent zoom on inputs on iOS (use >=16px) */
+    input{font-size:16px}
+  </style>
 </head>
 <body>
-<!-- Top bar -->
-<header class="bar sticky top-0 z-10">
-<div class="max-w-3xl mx-auto px-4 h-14 flex items-center justify-between">
-<div class="font-extrabold">Gloves Up 🥊🆙</div>
-<a class="px-3 py-2 rounded-full bg-green-600 hover:bg-green-700 font-bold"
-href="https://wa.me/447825954329?text=Hi%20Gloves%20Up%20🥊🆙%2C%20I%20want%20to%20book%20a%20session."
-target="_blank" rel="noopener noreferrer">WhatsApp</a>
-</div>
-</header>
+  <!-- Global top bar -->
+  <header class="bar sticky top-0 z-10" style="height:var(--bar-h)">
+    <div class="max-w-3xl mx-auto h-full flex items-center justify-between">
+      <div class="font-extrabold text-base sm:text-lg">Gloves Up 🥊🆙</div>
+      <a class="px-3 py-2 rounded-full bg-green-600 hover:bg-green-700 font-bold text-sm"
+         href="https://wa.me/447825954329?text=Hi%20Gloves%20Up%20🥊🆙%2C%20I%20want%20to%20book%20a%20session."
+         target="_blank" rel="noopener noreferrer">WhatsApp</a>
+    </div>
+  </header>
 
-<!-- Full-screen bot container -->
-<main class="h-[calc(100vh-56px)]"> <!-- 56px ≈ header height -->
-<div class="max-w-3xl mx-auto h-full px-4">
-<div class="h-full rounded-2xl border border-[#2a2f3a] overflow-hidden flex flex-col">
-<!-- Bot title -->
-<div class="px-4 py-3 bg-[#161a22] flex items-center gap-2">
-<span class="text-xl">🥊</span>
-<div class="font-bold">Gloves Up Bot</div>
-<div class="ml-auto w-2 h-2 rounded-full bg-green-500"></div>
-</div>
+  <!-- Full-screen (minus bar) app -->
+  <main class="wrap">
+    <div class="max-w-3xl mx-auto h-full">
+      <div class="frame">
+        <div class="top">
+          <span class="text-xl">🥊</span>
+          <div class="font-bold">Gloves Up Bot</div>
+          <div class="dot"></div>
+        </div>
 
-<!-- Chat area (scrolls) -->
-<div id="chat" class="flex-1 overflow-y-auto p-4 space-y-3">
-<div class="flex items-start gap-3">
-<div class="bot px-4 py-3 rounded-2xl rounded-tl-sm text-sm">
-Yo champ 👊 What are you here for today?
-</div>
-</div>
-</div>
+        <div id="chat" class="chat space-y-3">
+          <div class="flex items-start gap-3">
+            <div class="bot px-4 py-3 rounded-2xl rounded-tl-sm t-sm">
+              Yo champ 👊 What are you here for today?
+            </div>
+          </div>
+        </div>
 
-<!-- Controls -->
-<div id="panel" class="panel p-4"></div>
-</div>
-</div>
-</main>
+        <div id="panel" class="panel"></div>
+      </div>
+    </div>
+  </main>
 
-<script>
-/* ========= BOT ENGINE (with “Been here before?”) ========= */
-const chat = document.getElementById('chat');
-const panel = document.getElementById('panel');
+  <script>
+    /* ======= Mobile/iPad viewport fix (iOS Safari) ======= */
+    function setVh(){
+      const vh = window.innerHeight + 'px'; // excludes address bar when collapsed
+      document.documentElement.style.setProperty('--app-vh', vh);
+    }
+    setVh(); window.addEventListener('resize', setVh);
+    window.addEventListener('orientationchange', ()=>setTimeout(setVh, 250));
 
-function addBot(t){
-const row=document.createElement('div');
-row.className="flex items-start gap-3";
-row.innerHTML=`<div class="bot px-4 py-3 rounded-2xl rounded-tl-sm text-sm">${t}</div>`;
-chat.appendChild(row); chat.scrollTop=chat.scrollHeight;
-}
-function addUser(t){
-const row=document.createElement('div');
-row.className="flex items-start gap-3 justify-end";
-row.innerHTML=`<div class="user px-4 py-3 rounded-2xl rounded-tr-sm text-sm">${t}</div>`;
-chat.appendChild(row); chat.scrollTop=chat.scrollHeight;
-}
+    /* =================== Bot engine =================== */
+    const chat  = document.getElementById('chat');
+    const panel = document.getElementById('panel');
 
-const menu = [
-{id:'believers', label:'👶 Believers (6–12)'},
-{id:'builders', label:'🔥 Builders (13–17)'},
-{id:'becomers', label:'💪 Becomers (18+)'},
-{id:'skipping', label:'🪢 Skipping (Rise & Rope)'},
-{id:'fitness', label:'🔥 Fitness Classes'},
-{id:'taster', label:'⚡ Free Taster'},
-{id:'halfprice', label:'💥 Half-Price First Hour'},
-{id:'prices', label:'💰 Prices & Info'}
-];
+    const menu = [
+      {id:'believers', label:'👶 Believers (6–12)'},
+      {id:'builders',  label:'🔥 Builders (13–17)'},
+      {id:'becomers',  label:'💪 Becomers (18+)'},
+      {id:'skipping',  label:'🪢 Skipping (Rise & Rope)'},
+      {id:'fitness',   label:'🔥 Fitness Classes'},
+      {id:'taster',    label:'⚡ Free Taster'},
+      {id:'halfprice', label:'💥 Half-Price First Hour'},
+      {id:'prices',    label:'💰 Prices & Info'}
+    ];
+    const stepBeenHere = {k:'been', q:'Have you trained with Gloves Up before?', type:'choice', opts:['Yes','No']};
 
-// Reusable step used in all flows
-const stepBeenHere = {k:'been', q:'Have you trained with Gloves Up before?', type:'choice', opts:['Yes','No']};
-
-const flows = {
-believers:{
-intro:"Believers 💥 £10/30 • £15/60 — I’ll grab a few details.",
-steps:[
-{k:'name', q:'Your name'},
-{k:'age', q:'Age'},
-stepBeenHere,
-{k:'duration', q:'Duration', type:'choice', opts:['30 mins (£10)','60 mins (£15)']},
-{k:'when', q:'Preferred day & time (e.g., Mon 4:30pm)'},
-{k:'health', q:'Health conditions (if any)'},
-{k:'parent', q:'Parent/Guardian name & number (if U18)', cond:d=>parseInt(d.age||0,10)<18},
-{k:'emergency', q:'Emergency contact name & number'}
-],
-build:d=>`Hi Gloves Up 🥊🆙, I want to book as a Believer.
+    const flows = {
+      believers:{
+        intro:"Believers 💥 £10/30 • £15/60 — I’ll grab a few details.",
+        steps:[
+          {k:'name', q:'Your name'},
+          {k:'age',  q:'Age'},
+          stepBeenHere,
+          {k:'duration', q:'Duration', type:'choice', opts:['30 mins (£10)','60 mins (£15)']},
+          {k:'when', q:'Preferred day & time (e.g., Mon 4:30pm)'},
+          {k:'health', q:'Health conditions (if any)'},
+          {k:'parent', q:'Parent/Guardian name & number (if U18)', cond:d=>parseInt(d.age||0,10)<18},
+          {k:'emergency', q:'Emergency contact name & number'}
+        ],
+        build:d=>`Hi Gloves Up 🥊🆙, I want to book as a Believer.
 Name: ${d.name}
 Age: ${d.age}
 Been Before: ${d.been}
@@ -105,20 +131,20 @@ Preferred Day/Time: ${d.when}
 Health Conditions: ${d.health||'None'}
 Parent/Guardian: ${d.parent||'N/A'}
 Emergency Contact: ${d.emergency}`
-},
-builders:{
-intro:"Builders 🚀 £10/30 • £20/60 — let’s go.",
-steps:[
-{k:'name', q:'Your name'},
-{k:'age', q:'Age'},
-stepBeenHere,
-{k:'duration', q:'Duration', type:'choice', opts:['30 mins (£10)','60 mins (£20)']},
-{k:'when', q:'Preferred day & time'},
-{k:'health', q:'Health conditions (if any)'},
-{k:'parent', q:'Parent/Guardian name & number (if U18)', cond:d=>parseInt(d.age||0,10)<18},
-{k:'emergency', q:'Emergency contact name & number'}
-],
-build:d=>`Hi Gloves Up 🥊🆙, I want to book as a Builder.
+      },
+      builders:{
+        intro:"Builders 🚀 £10/30 • £20/60 — let’s go.",
+        steps:[
+          {k:'name', q:'Your name'},
+          {k:'age',  q:'Age'},
+          stepBeenHere,
+          {k:'duration', q:'Duration', type:'choice', opts:['30 mins (£10)','60 mins (£20)']},
+          {k:'when', q:'Preferred day & time'},
+          {k:'health', q:'Health conditions (if any)'},
+          {k:'parent', q:'Parent/Guardian name & number (if U18)', cond:d=>parseInt(d.age||0,10)<18},
+          {k:'emergency', q:'Emergency contact name & number'}
+        ],
+        build:d=>`Hi Gloves Up 🥊🆙, I want to book as a Builder.
 Name: ${d.name}
 Age: ${d.age}
 Been Before: ${d.been}
@@ -127,19 +153,19 @@ Preferred Day/Time: ${d.when}
 Health Conditions: ${d.health||'None'}
 Parent/Guardian: ${d.parent||'N/A'}
 Emergency Contact: ${d.emergency}`
-},
-becomers:{
-intro:"Becomers 💪 £15/30 • £25/60 — lock it in.",
-steps:[
-{k:'name', q:'Your name'},
-{k:'age', q:'Age'},
-stepBeenHere,
-{k:'duration', q:'Duration', type:'choice', opts:['30 mins (£15)','60 mins (£25)']},
-{k:'when', q:'Preferred day & time'},
-{k:'health', q:'Health conditions (if any)'},
-{k:'emergency', q:'Emergency contact name & number'}
-],
-build:d=>`Hi Gloves Up 🥊🆙, I want to book as a Becomer.
+      },
+      becomers:{
+        intro:"Becomers 💪 £15/30 • £25/60 — lock it in.",
+        steps:[
+          {k:'name', q:'Your name'},
+          {k:'age',  q:'Age'},
+          stepBeenHere,
+          {k:'duration', q:'Duration', type:'choice', opts:['30 mins (£15)','60 mins (£25)']},
+          {k:'when', q:'Preferred day & time'},
+          {k:'health', q:'Health conditions (if any)'},
+          {k:'emergency', q:'Emergency contact name & number'}
+        ],
+        build:d=>`Hi Gloves Up 🥊🆙, I want to book as a Becomer.
 Name: ${d.name}
 Age: ${d.age}
 Been Before: ${d.been}
@@ -147,19 +173,19 @@ Duration: ${d.duration}
 Preferred Day/Time: ${d.when}
 Health Conditions: ${d.health||'None'}
 Emergency Contact: ${d.emergency}`
-},
-skipping:{
-intro:"Rise & Rope 🪢 £10/30 — pick your level.",
-steps:[
-{k:'name', q:'Your name'},
-{k:'age', q:'Age'},
-stepBeenHere,
-{k:'level', q:'Level', type:'choice', opts:['Beginner','Intermediate','Advanced']},
-{k:'when', q:'Preferred day & time'},
-{k:'health', q:'Health conditions (if any)'},
-{k:'emergency', q:'Emergency contact name & number'}
-],
-build:d=>`Hi Gloves Up 🥊🆙, I want to book a Skipping (Rise & Rope) session.
+      },
+      skipping:{
+        intro:"Rise & Rope 🪢 £10/30 — pick your level.",
+        steps:[
+          {k:'name', q:'Your name'},
+          {k:'age',  q:'Age'},
+          stepBeenHere,
+          {k:'level', q:'Level', type:'choice', opts:['Beginner','Intermediate','Advanced']},
+          {k:'when', q:'Preferred day & time'},
+          {k:'health', q:'Health conditions (if any)'},
+          {k:'emergency', q:'Emergency contact name & number'}
+        ],
+        build:d=>`Hi Gloves Up 🥊🆙, I want to book a Skipping (Rise & Rope) session.
 Name: ${d.name}
 Age: ${d.age}
 Been Before: ${d.been}
@@ -167,19 +193,19 @@ Level: ${d.level}
 Preferred Day/Time: ${d.when}
 Health Conditions: ${d.health||'None'}
 Emergency Contact: ${d.emergency}`
-},
-fitness:{
-intro:"Fitness classes £5 (or 10 for £40). Pick your class.",
-steps:[
-{k:'class', q:'Class type', type:'choice', opts:['Standard (Mon 7 PM / Tue 5 PM)','Advanced (Wed 8 PM / Thu 5 PM)',"Fighters’ (Sat 1 PM)"]},
-stepBeenHere,
-{k:'people', q:'How many people?'},
-{k:'names', q:'Names of attendees'},
-{k:'when', q:'Which day/time from schedule?'},
-{k:'health', q:'Health conditions (if any)'},
-{k:'emergency', q:'Emergency contact name & number'}
-],
-build:d=>`Hi Gloves Up 🥊🆙, I’d like to book a Fitness Class.
+      },
+      fitness:{
+        intro:"Fitness classes £5 (or 10 for £40). Pick your class.",
+        steps:[
+          {k:'class', q:'Class type', type:'choice', opts:['Standard (Mon 7 PM / Tue 5 PM)','Advanced (Wed 8 PM / Thu 5 PM)',"Fighters’ (Sat 1 PM)"]},
+          stepBeenHere,
+          {k:'people', q:'How many people?'},
+          {k:'names',  q:'Names of attendees'},
+          {k:'when',   q:'Which day/time from schedule?'},
+          {k:'health', q:'Health conditions (if any)'},
+          {k:'emergency', q:'Emergency contact name & number'}
+        ],
+        build:d=>`Hi Gloves Up 🥊🆙, I’d like to book a Fitness Class.
 Class Type: ${d.class}
 Been Before: ${d.been}
 People: ${d.people}
@@ -188,19 +214,19 @@ Day & Time: ${d.when}
 Health Conditions: ${d.health||'None'}
 Emergency Contact: ${d.emergency}
 (£5 per person; 10 for £40 prepaid)`
-},
-taster:{
-intro:"Free Taster ⚡ 20 mins pads (first-timers).",
-steps:[
-{k:'name', q:'Your name'},
-{k:'age', q:'Age'},
-stepBeenHere,
-{k:'when', q:'Preferred day & time'},
-{k:'health', q:'Health conditions (if any)'},
-{k:'parent', q:'Parent/Guardian name & number (if U18)', cond:d=>parseInt(d.age||0,10)<18},
-{k:'emergency', q:'Emergency contact name & number'}
-],
-build:d=>`Hi Gloves Up 🥊🆙, I’d like to book a Free Taster.
+      },
+      taster:{
+        intro:"Free Taster ⚡ 20 mins pads (first-timers).",
+        steps:[
+          {k:'name', q:'Your name'},
+          {k:'age',  q:'Age'},
+          stepBeenHere,
+          {k:'when', q:'Preferred day & time'},
+          {k:'health', q:'Health conditions (if any)'},
+          {k:'parent', q:'Parent/Guardian name & number (if U18)', cond:d=>parseInt(d.age||0,10)<18},
+          {k:'emergency', q:'Emergency contact name & number'}
+        ],
+        build:d=>`Hi Gloves Up 🥊🆙, I’d like to book a Free Taster.
 Name: ${d.name}
 Age: ${d.age}
 Been Before: ${d.been}
@@ -208,19 +234,19 @@ Preferred Day/Time: ${d.when}
 Health Conditions: ${d.health||'None'}
 Parent/Guardian: ${d.parent||'N/A'}
 Emergency Contact: ${d.emergency}`
-},
-halfprice:{
-intro:"Half-Price First Hour 💥",
-steps:[
-{k:'name', q:'Your name'},
-{k:'age', q:'Age'},
-stepBeenHere,
-{k:'when', q:'Preferred day & time'},
-{k:'health', q:'Health conditions (if any)'},
-{k:'parent', q:'Parent/Guardian name & number (if U18)', cond:d=>parseInt(d.age||0,10)<18},
-{k:'emergency', q:'Emergency contact name & number'}
-],
-build:d=>`Hi Gloves Up 🥊🆙, I’d like the Half-Price First Hour deal.
+      },
+      halfprice:{
+        intro:"Half-Price First Hour 💥",
+        steps:[
+          {k:'name', q:'Your name'},
+          {k:'age',  q:'Age'},
+          stepBeenHere,
+          {k:'when', q:'Preferred day & time'},
+          {k:'health', q:'Health conditions (if any)'},
+          {k:'parent', q:'Parent/Guardian name & number (if U18)', cond:d=>parseInt(d.age||0,10)<18},
+          {k:'emergency', q:'Emergency contact name & number'}
+        ],
+        build:d=>`Hi Gloves Up 🥊🆙, I’d like the Half-Price First Hour deal.
 Name: ${d.name}
 Age: ${d.age}
 Been Before: ${d.been}
@@ -228,20 +254,20 @@ Preferred Day/Time: ${d.when}
 Health Conditions: ${d.health||'None'}
 Parent/Guardian: ${d.parent||'N/A'}
 Emergency Contact: ${d.emergency}`
-},
-prices:{
-intro:"Prices loaded 💰 Tell me what you want to book.",
-steps:[
-{k:'name', q:'Your name'},
-{k:'age', q:'Age'},
-stepBeenHere,
-{k:'what', q:'What do you want to book?'},
-{k:'when', q:'Preferred day & time'},
-{k:'health', q:'Health conditions (if any)'},
-{k:'parent', q:'Parent/Guardian name & number (if U18)', cond:d=>parseInt(d.age||0,10)<18},
-{k:'emergency', q:'Emergency contact name & number'}
-],
-build:d=>`Hi Gloves Up 🥊🆙, I’d like to book.
+      },
+      prices:{
+        intro:"Prices loaded 💰 Tell me what you want to book.",
+        steps:[
+          {k:'name', q:'Your name'},
+          {k:'age',  q:'Age'},
+          stepBeenHere,
+          {k:'what', q:'What do you want to book?'},
+          {k:'when', q:'Preferred day & time'},
+          {k:'health', q:'Health conditions (if any)'},
+          {k:'parent', q:'Parent/Guardian name & number (if U18)', cond:d=>parseInt(d.age||0,10)<18},
+          {k:'emergency', q:'Emergency contact name & number'}
+        ],
+        build:d=>`Hi Gloves Up 🥊🆙, I’d like to book.
 Name: ${d.name}
 Age: ${d.age}
 Been Before: ${d.been}
@@ -250,91 +276,105 @@ Date/Time: ${d.when}
 Health Conditions: ${d.health||'None'}
 Parent/Guardian: ${d.parent||'N/A'}
 Emergency Contact: ${d.emergency}`
-}
-};
+      }
+    };
 
-let state = { flow:null, step:0, data:{} };
+    let state = { flow:null, step:0, data:{} };
 
-function renderMenu(){
-panel.innerHTML = '<div class="grid grid-cols-1 gap-2"></div>';
-const grid = panel.firstChild;
-menu.forEach(m=>{
-const b=document.createElement('button');
-b.className="btn px-4 py-3 rounded-xl text-left";
-b.textContent=m.label;
-b.onclick=()=>startFlow(m.id);
-grid.appendChild(b);
-});
-}
+    function addBot(t){
+      const row=document.createElement('div');
+      row.className="flex items-start gap-3";
+      row.innerHTML=`<div class="bot px-4 py-3 rounded-2xl rounded-tl-sm t-sm">${t}</div>`;
+      chat.appendChild(row); chat.scrollTop=chat.scrollHeight;
+    }
+    function addUser(t){
+      const row=document.createElement('div');
+      row.className="flex items-start gap-3 justify-end";
+      row.innerHTML=`<div class="user px-4 py-3 rounded-2xl rounded-tr-sm t-sm">${t}</div>`;
+      chat.appendChild(row); chat.scrollTop=chat.scrollHeight;
+    }
 
-function startFlow(id){
-state = { flow:id, step:0, data:{} };
-const label = menu.find(x=>x.id===id).label;
-addUser(label);
-setTimeout(()=>{ addBot(flows[id].intro); ask(); }, 150);
-}
+    function renderMenu(){
+      panel.innerHTML='<div class="grid grid-cols-1 gap-2"></div>';
+      const grid=panel.firstChild;
+      menu.forEach(m=>{
+        const b=document.createElement('button');
+        b.className="btn tap text-left";
+        b.textContent=m.label;
+        b.onclick=()=>startFlow(m.id);
+        grid.appendChild(b);
+      });
+    }
 
-function ask(){
-const f = flows[state.flow];
-while (state.step < f.steps.length){
-const s=f.steps[state.step];
-if (s.cond && !s.cond(state.data)){ state.step++; continue; }
-return drawStep(s);
-}
-// finished
-const msg = f.build(state.data);
-panel.innerHTML = `
-<div class="space-y-3">
-<a class="block text-center font-bold px-5 py-4 rounded-xl bg-green-600 hover:bg-green-700"
-href="${'https://wa.me/447825954329?text='+encodeURIComponent(msg)}"
-target="_blank" rel="noopener noreferrer">Send to WhatsApp 🥊🆙</a>
-<button class="w-full px-4 py-3 rounded-xl btn" onclick="renderMenu()">Start Over</button>
-</div>`;
-addBot("Alright champ, hit the button to confirm on WhatsApp and we’ll get you booked.");
-}
+    function startFlow(id){
+      state={flow:id,step:0,data:{}};
+      addUser(menu.find(x=>x.id===id).label);
+      setTimeout(()=>{ addBot(flows[id].intro); ask(); },150);
+    }
 
-function drawStep(s){
-if (s.type==='choice'){
-panel.innerHTML = `
-<div class="space-y-2">
-<div class="font-semibold text-sm opacity-80">${s.q}</div>
-<div id="choices" class="grid grid-cols-1 gap-2"></div>
-<button class="w-full px-4 py-3 rounded-xl btn mt-2" onclick="back()">Back</button>
-</div>`;
-const box=document.getElementById('choices');
-s.opts.forEach(opt=>{
-const b=document.createElement('button');
-b.className="btn px-4 py-3 rounded-xl text-left";
-b.textContent=opt;
-b.onclick=()=>{ addUser(opt); state.data[s.k]=opt; state.step++; ask(); };
-box.appendChild(b);
-});
-}else{
-panel.innerHTML = `
-<div class="space-y-3">
-<label class="font-semibold text-sm opacity-80" for="inp">${s.q}</label>
-<input id="inp" class="w-full px-4 py-3 rounded-xl bg-[#1b2030] border border-[#2a2f3a] outline-none" />
-<div class="flex gap-2">
-<button class="flex-1 px-4 py-3 rounded-xl btn" onclick="back()">Back</button>
-<button class="flex-1 px-4 py-3 rounded-xl bg-orange-600 hover:bg-orange-700 font-bold" onclick="next('${s.k}')">Continue</button>
-</div>
-</div>`;
-document.getElementById('inp').focus();
-}
-}
+    function ask(){
+      const f=flows[state.flow];
+      while(state.step<f.steps.length){
+        const s=f.steps[state.step];
+        if(s.cond && !s.cond(state.data)){ state.step++; continue; }
+        drawStep(s); return;
+      }
+      const msg=f.build(state.data);
+      panel.innerHTML=`
+        <div class="space-y-3">
+          <a class="block text-center font-bold tap bg-green-600 hover:bg-green-700"
+             href="${'https://wa.me/447825954329?text='+encodeURIComponent(msg)}"
+             target="_blank" rel="noopener noreferrer">Send to WhatsApp 🥊🆙</a>
+          <button class="w-full tap btn" onclick="renderMenu()">Start Over</button>
+        </div>`;
+      addBot("Alright champ, hit the button to confirm on WhatsApp and we’ll get you booked.");
+    }
 
-function next(key){
-const v=(document.getElementById('inp').value||'').trim();
-if(!v){ addBot("Quick one — I need that to continue 💬"); return; }
-addUser(v); state.data[key]=v; state.step++; ask();
-}
-function back(){
-if(state.step===0){ renderMenu(); return; }
-state.step--; const f=flows[state.flow]; const s=f.steps[state.step]; if(s) delete state.data[s.k]; ask();
-}
+    function drawStep(s){
+      if(s.type==='choice'){
+        panel.innerHTML=`
+          <div class="space-y-2">
+            <div class="font-semibold text-sm opacity-80">${s.q}</div>
+            <div id="choices" class="grid grid-cols-1 gap-2"></div>
+            <button class="w-full tap btn mt-2" onclick="back()">Back</button>
+          </div>`;
+        const box=document.getElementById('choices');
+        s.opts.forEach(opt=>{
+          const b=document.createElement('button');
+          b.className="btn tap text-left";
+          b.textContent=opt;
+          b.onclick=()=>{ addUser(opt); state.data[s.k]=opt; state.step++; ask(); };
+          box.appendChild(b);
+        });
+      }else{
+        panel.innerHTML=`
+          <div class="space-y-3">
+            <label class="font-semibold text-sm opacity-80" for="inp">${s.q}</label>
+            <input id="inp" inputmode="text"
+                   class="w-full tap bg-[#1b2030] border border-[#2a2f3a] rounded-xl outline-none"
+                   placeholder="" />
+            <div class="flex gap-2">
+              <button class="flex-1 tap btn" onclick="back()">Back</button>
+              <button class="flex-1 tap bg-orange-600 hover:bg-orange-700 rounded-xl font-bold"
+                      onclick="next('${s.k}')">Continue</button>
+            </div>
+          </div>`;
+        const i=document.getElementById('inp'); i.focus(); i.setSelectionRange(i.value.length, i.value.length);
+      }
+    }
 
-// boot
-renderMenu();
-</script>
+    function next(key){
+      const v=(document.getElementById('inp').value||'').trim();
+      if(!v){ addBot("Quick one — I need that to continue 💬"); return; }
+      addUser(v); state.data[key]=v; state.step++; ask();
+    }
+    function back(){
+      if(state.step===0){ renderMenu(); return; }
+      state.step--; const f=flows[state.flow]; const s=f.steps[state.step]; if(s) delete state.data[s.k]; ask();
+    }
+
+    // boot
+    renderMenu();
+  </script>
 </body>
 </html>
