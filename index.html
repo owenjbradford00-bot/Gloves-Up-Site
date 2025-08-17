@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Gloves Up 🥊🆙</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+body{background:#0f1115;color:#eef2f7}
+.bot{background:#2a2f3a}
+.user{background:#3b4252}
+.btn{background:#475062}
+.btn:hover{background:#59627a}
+</style>
+</head>
+<body class="min-h-screen">
+<header class="sticky top-0 z-10 bg-[#161a22] border-b border-[#2a2f3a]">
+<div class="max-w-3xl mx-auto px-4 py-3 flex items-center justify-between">
+<h1 class="font-black">Gloves Up 🥊🆙</h1>
+<a class="px-4 py-2 rounded-full bg-green-600 hover:bg-green-700 font-bold"
+href="https://wa.me/447825954329?text=Hi%20Gloves%20Up%20🥊🆙%2C%20I%20want%20to%20book%20a%20session."
+target="_blank" rel="noopener noreferrer">Message Gloves Up</a>
+</div>
+</header>
+
+<main class="max-w-3xl mx-auto px-4 py-8">
+<section class="text-center mb-8">
+<h2 class="text-3xl font-extrabold">UNLEASH YOUR INNER CHAMPION</h2>
+<p class="mt-2 opacity-80">Outdoor boxing for all levels. Start the bot to get booked.</p>
+<button class="mt-4 px-5 py-3 rounded-xl bg-orange-600 hover:bg-orange-700 font-bold"
+onclick="document.getElementById('bot').scrollIntoView({behavior:'smooth'})">
+Start Gloves Up Bot 🥊🆙
+</button>
+</section>
+
+<section id="bot">
+<div class="rounded-2xl border border-[#2a2f3a] overflow-hidden">
+<div class="px-4 py-3 bg-[#161a22] flex items-center gap-2">
+<span class="text-xl">🥊</span>
+<div class="font-bold">Gloves Up Bot</div>
+<div class="ml-auto w-2 h-2 rounded-full bg-green-500"></div>
+</div>
+<div id="chat" class="h-96 overflow-y-auto p-4 space-y-3">
+<div class="flex items-start gap-3">
+<div class="bot px-4 py-3 rounded-2xl rounded-tl-sm text-sm">Yo champ 👊 What are you here for today?</div>
+</div>
+</div>
+<div id="panel" class="p-4 border-t border-[#2a2f3a]"></div>
+</div>
+</section>
+
+<section class="mt-10 grid gap-4">
+<div class="p-4 rounded-xl border border-[#2a2f3a]">
+<div class="font-bold">Believers (6–12)</div>
+<div class="opacity-80">£10/30 • £15/60</div>
+</div>
+<div class="p-4 rounded-xl border border-[#2a2f3a]">
+<div class="font-bold">Builders (13–17)</div>
+<div class="opacity-80">£10/30 • £20/60</div>
+</div>
+<div class="p-4 rounded-xl border border-[#2a2f3a]">
+<div class="font-bold">Becomers (18+)</div>
+<div class="opacity-80">£15/30 • £25/60</div>
+</div>
+<div class="p-4 rounded-xl border border-[#2a2f3a]">
+<div class="font-bold">Rise & Rope (Skipping)</div>
+<div class="opacity-80">£10/30 — Beginner / Intermediate / Advanced</div>
+</div>
+<div class="p-4 rounded-xl border border-[#2a2f3a]">
+<div class="font-bold">Fitness Classes</div>
+<div class="opacity-80">Mon 7 PM (Standard) · Tue 5 PM (Standard) · Wed 8 PM (Advanced) · Thu 5 PM (Advanced) · Sat 1 PM (Fighters’) — £5 each (10 for £40)</div>
+</div>
+<div class="p-4 rounded-xl border border-[#2a2f3a]">
+<div class="font-bold">Deals</div>
+<div class="opacity-80">Free Taster (first-timers, pads only) • Half-Price First Hour</div>
+</div>
+</section>
+</main>
+
+<footer class="mt-10 py-8 text-center opacity-70 border-t border-[#2a2f3a]">
+© 2025 Gloves Up Boxing — Outdoor boxing that transforms.
+</footer>
+
+<script>
+/* Simple multi-step bot that only shows WhatsApp at the end */
+const chat = document.getElementById('chat');
+const panel = document.getElementById('panel');
+
+const flows = {
+believers: {
+intro: "Believers 💥 £10/30 • £15/60 — I’ll grab a few details.",
+steps: [
+{k:'name', q:'Your name'},
+{k:'age', q:'Age'},
+{k:'duration', q:'Duration', type:'choice', opts:['30 mins (£10)','60 mins (£15)']},
+{k:'when', q:'Preferred day & time (e.g., Tue 4:30pm)'},
+{k:'health', q:'Health conditions (if any)'},
+{k:'parent', q:'Parent/Guardian name & number (if U18)', cond:d=>parseInt(d.age||0,10)<18},
+{k:'emergency', q:'Emergency contact name & number'}
+],
+build:d=>`Hi Gloves Up 🥊🆙, I want to book as a Believer.
+Name: ${d.name}
+Age: ${d.age}
+Duration: ${d.duration}
+Preferred Day/Time: ${d.when}
+Health Conditions: ${d.health||'None'}
+Parent/Guardian: ${d.parent||'N/A'}
+Emergency Contact: ${d.emergency}`
+},
+builders: {
+intro: "Builders 🚀 £10/30 • £20/60 — let’s go.",
+steps: [
+{k:'name', q:'Your name'},
+{k:'age', q:'Age'},
+{k:'duration', q:'Duration', type:'choice', opts:['30 mins (£10)','60 mins (£20)']},
+{k:'when', q:'Preferred day & time'},
+{k:'health', q:'Health conditions (if any)'},
+{k:'parent', q:'Parent/Guardian name & number (if U18)', cond:d=>parseInt(d.age||0,10)<18},
+{k:'emergency', q:'Emergency contact name & number'}
+],
+build:d=>`Hi Gloves Up 🥊🆙, I want to book as a Builder.
+Name: ${d.name}
+Age: ${d.age}
+Duration: ${d.duration}
+Preferred Day/Time: ${d.when}
+Health Conditions: ${d.health||'None'}
+Parent/Guardian: ${d.parent||'N/A'}
+Emergency Contact: ${d.emergency}`
+},
+becomers: {
+intro: "Becomers 💪 £15/30 • £25/60 — let’s lock it in.",
+steps: [
+{k:'name', q:'Your name'},
+{k:'age', q:'Age'},
+{k:'duration', q:'Duration', type:'choice', opts:['30 mins (£15)','60 mins (£25)']},
+{k:'when', q:'Preferred day & time'},
+{k:'health', q:'Health conditions (if any)'},
+{k:'emergency', q:'Emergency contact name & number'}
+],
+build:d=>`Hi Gloves Up 🥊🆙, I want to book as a Becomer.
+Name: ${d.name}
+Age: ${d.age}
+Duration: ${d.duration}
+Preferred Day/Time: ${d.when}
+Health Conditions: ${d.health||'None'}
+Emergency Contact: ${d.emergency}`
+},
+skipping: {
+intro: "Rise & Rope 🪢 £10/30 — pick level.",
+steps: [
+{k:'name', q:'Your name'},
+{k:'age', q:'Age'},
+{k:'level', q:'Level', type:'choice', opts:['Beginner','Intermediate','Advanced']},
+{k:'when', q:'Preferred day & time'},
+{k:'health', q:'Health conditions (if any)'},
+{k:'emergency', q:'Emergency contact name & number'}
+],
+build:d=>`Hi Gloves Up 🥊🆙, I want to book a Skipping (Rise & Rope) session.
+Name: ${d.name}
+Age: ${d.age}
+Level: ${d.level}
+Preferred Day/Time: ${d.when}
+Health Conditions: ${d.health||'None'}
+Emergency Contact: ${d.emergency}`
+},
+fitness: {
+intro: "Fitness classes £5 (or 10 for £40). Pick your class.",
+steps: [
+{k:'class', q:'Class type', type:'choice', opts:['Standard (Mon 7 PM / Tue 5 PM)','Advanced (Wed 8 PM / Thu 5 PM)',"Fighters’ (Sat 1 PM)"]},
+{k:'people', q:'How many people?'},
+{k:'names', q:'Names of attendees'},
+{k:'when', q:'Which day/time from schedule?'},
+{k:'health', q:'Health conditions (if any)'},
+{k:'emergency', q:'Emergency contact name & number'}
+],
+build:d=>`Hi Gloves Up 🥊🆙, I’d like to book a Fitness Class.
+Class Type: ${d.class}
+People: ${d.people}
+Names: ${d.names}
+Day & Time: ${d.when}
+Health Conditions: ${d.health||'None'}
+Emergency Contact: ${d.emergency}
+(£5 per person; 10 for £40 prepaid)`
+},
+taster: {
+intro: "Free Taster ⚡ 20 mins pads (first-timers).",
+steps: [
+{k:'name', q:'Your name'},
+{k:'age', q:'Age'},
+{k:'when', q:'Preferred day & time'},
+{k:'health', q:'Health conditions (if any)'},
+{k:'parent', q:'Parent/Guardian name & number (if U18)', cond:d=>parseInt(d.age||0,10)<18},
+{k:'emergency', q:'Emergency contact name & number'}
+],
+build:d=>`Hi Gloves Up 🥊🆙, I’d like to book a Free Taster.
+Name: ${d.name}
+Age: ${d.age}
+Preferred Day/Time: ${d.when}
+Health Conditions: ${d.health||'None'}
+Parent/Guardian: ${d.parent||'N/A'}
+Emergency Contact: ${d.emergency}`
+},
+halfprice: {
+intro: "Half-Price First Hour 💥",
+steps: [
+{k:'name', q:'Your name'},
+{k:'age', q:'Age'},
+{k:'when', q:'Preferred day & time'},
+{k:'health', q:'Health conditions (if any)'},
+{k:'parent', q:'Parent/Guardian name & number (if U18)', cond:d=>parseInt(d.age||0,10)<18},
+{k:'emergency', q:'Emergency contact name & number'}
+],
+build:d=>`Hi Gloves Up 🥊🆙, I’d like the Half-Price First Hour deal.
+Name: ${d.name}
+Age: ${d.age}
+Preferred Day/Time: ${d.when}
+Health Conditions: ${d.health||'None'}
+Parent/Guardian: ${d.parent||'N/A'}
+Emergency Contact: ${d.emergency}`
+},
+prices: {
+intro: "Prices loaded 💰 Tell me what you want to book.",
+steps: [
+{k:'name', q:'Your name'},
+{k:'age', q:'Age'},
+{k:'what', q:'What do you want to book?'},
+{k:'when', q:'Preferred day & time'},
+{k:'health', q:'Health conditions (if any)'},
+{k:'parent', q:'Parent/Guardian name & number (if U18)', cond:d=>parseInt(d.age||0,10)<18},
+{k:'emergency', q:'Emergency contact name & number'}
+],
+build:d=>`Hi Gloves Up 🥊🆙, I’d like to book.
+Name: ${d.name}
+Age: ${d.age}
+Session Type: ${d.what}
+Date/Time: ${d.when}
+Health Conditions: ${d.health||'None'}
+Parent/Guardian: ${d.parent||'N/A'}
+Emergency Contact: ${d.emergency}`
+}
+};
+
+const menu = [
+{id:'believers', label:'👶 Believers (6–12)'},
+{id:'builders', label:'🔥 Builders (13–17)'},
+{id:'becomers', label:'💪 Becomers (18+)'},
+{id:'skipping', label:'🪢 Skipping (Rise & Rope)'},
+{id:'fitness', label:'🔥 Fitness Classes'},
+{id:'taster', label:'⚡ Free Taster'},
+{id:'halfprice', label:'💥 Half-Price First Hour'},
+{id:'prices', label:'💰 Prices & Info'}
+];
+
+let state = { flow:null, step:0, data:{} };
+
+function addBot(text){
+const row=document.createElement('div');
+row.className="flex items-start gap-3";
+row.innerHTML=`<div class="bot px-4 py-3 rounded-2xl rounded-tl-sm text-sm">${text}</div>`;
+chat.appendChild(row); chat.scrollTop=chat.scrollHeight;
+}
+function addUser(text){
+const row=document.createElement('div');
+row.className="flex items-start gap-3 justify-end";
+row.innerHTML=`<div class="user px-4 py-3 rounded-2xl rounded-tr-sm text-sm">${text}</div>`;
+chat.appendChild(row); chat.scrollTop=chat.scrollHeight;
+}
+
+function renderMenu(){
+panel.innerHTML='<div class="grid grid-cols-1 gap-2"></div>';
+const grid=panel.firstChild;
+menu.forEach(m=>{
+const b=document.createElement('button');
+b.className="btn px-4 py-3 rounded-xl text-left";
+b.textContent=m.label;
+b.onclick=()=>startFlow(m.id);
+grid.appendChild(b);
+});
+}
+
+function startFlow(id){
+state={flow:id,step:0,data:{}};
+addUser(menu.find(x=>x.id===id).label);
+setTimeout(()=>{ addBot(flows[id].intro); ask(); },200);
+}
+
+function ask(){
+const f=flows[state.flow];
+while(state.step<f.steps.length){
+const s=f.steps[state.step];
+if(s.cond && !s.cond(state.data)){ state.step++; continue; }
+drawStep(s); return;
+}
+const msg=f.build(state.data);
+panel.innerHTML = `
+<div class="space-y-3">
+<a class="block text-center font-bold px-5 py-4 rounded-xl bg-green-600 hover:bg-green-700"
+href="${'https://wa.me/447825954329?text='+encodeURIComponent(msg)}" target="_blank" rel="noopener noreferrer">
+Send to WhatsApp 🥊🆙
+</a>
+<button class="w-full px-4 py-3 rounded-xl btn" onclick="renderMenu()">Start Over</button>
+</div>`;
+addBot("Alright champ, hit the button to confirm on WhatsApp and we’ll get you booked.");
+}
+
+function drawStep(s){
+if(s.type==='choice'){
+panel.innerHTML = `
+<div class="space-y-2">
+<div class="font-semibold text-sm opacity-80">${s.q}</div>
+<div id="choices" class="grid grid-cols-1 gap-2"></div>
+<button class="w-full px-4 py-3 rounded-xl btn mt-2" onclick="back()">Back</button>
+</div>`;
+const choices=document.getElementById('choices');
+s.opts.forEach(opt=>{
+const b=document.createElement('button');
+b.className="btn px-4 py-3 rounded-xl text-left";
+b.textContent=opt;
+b.onclick=()=>{ addUser(opt); state.data[s.k]=opt; state.step++; ask(); };
+choices.appendChild(b);
+});
+}else{
+panel.innerHTML = `
+<div class="space-y-3">
+<label class="font-semibold text-sm opacity-80" for="inp">${s.q}</label>
+<input id="inp" class="w-full px-4 py-3 rounded-xl bg-[#1b2030] border border-[#2a2f3a] outline-none">
+<div class="flex gap-2">
+<button class="flex-1 px-4 py-3 rounded-xl btn" onclick="back()">Back</button>
+<button class="flex-1 px-4 py-3 rounded-xl bg-orange-600 hover:bg-orange-700 font-bold" onclick="next('${s.k}')">Continue</button>
+</div>
+</div>`;
+document.getElementById('inp').focus();
+}
+}
+
+function next(key){
+const v=(document.getElementById('inp').value||'').trim();
+if(!v){ addBot("Quick one — I need that to continue 💬"); return; }
+addUser(v); state.data[key]=v; state.step++; ask();
+}
+function back(){
+if(state.step===0){ renderMenu(); return; }
+state.step--; const f=flows[state.flow]; const s=f.steps[state.step]; if(s) delete state.data[s.k]; ask();
+}
+
+// boot
+renderMenu();
+</script>
+</body>
+</html>
